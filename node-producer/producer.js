@@ -3,6 +3,9 @@ const amqp = require('amqplib');
 let connection = null;
 let channel = null;
 
+const levels = ['INFO', 'ERROR', 'DEBUG'];
+const randomLevel = levels[Math.floor(Math.random() * levels.length)];
+
 async function setupConnection() {
     connection = await amqp.connect('amqp://localhost');
     channel = await connection.createChannel();
@@ -22,10 +25,14 @@ async function sendLog() {
 
         const queue = 'logs';
         const log = JSON.stringify({
-            timestamp: new Date().toISOString(),
-            level: 'INFO',
-            message: 'User logged in',
-        });
+                timestamp: new Date().toISOString(),
+                level: 'INFO',
+                message: 'User logged in',
+                service: 'auth-service',
+                user_id: '12345',
+                ip_address: '192.168.1.1',
+                endpoint: '/login',
+              });
 
         channel.sendToQueue(queue, Buffer.from(log), {
             persistent: true // Make messages persistent
